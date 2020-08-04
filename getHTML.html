@@ -37,9 +37,12 @@
         ..\xxxxx\sss -->
     <!-- 规定禁止使用反斜杠， 相对路径以./或者../开头， @import引入绝对路径时会忽略该文件-->
     <script>
-        result = {href: location.href}
+        result = {
+            href: location.href
+        }
 
-        mainCSS()        
+        mainCSS()
+
         function mainCSS() {
             var links = Array.from(document.getElementsByTagName('link'))
             var cssLinks = links.filter(function (v, i) {
@@ -48,21 +51,18 @@
             var cssHref = cssLinks.map((v) => {
                 return v.href
             });
-            
+
             let url = cssHref[0]
             let baseUrl = url.replace(/\/[^\/]+\.css/, ""); // http://localhost:5500/css
-            for(let url of cssHref){
+            for (let url of cssHref) {
                 getCSS(url, baseUrl, result);
             }
-            console.log(result)
         }
 
-        function cssToString(){
 
-        }
-    
         function getCSS(url, baseUrl, result) {
             // url为绝对路径
+            var relativeUrlArr = []
             fetch(url, {
                     method: "GET",
                 })
@@ -70,16 +70,25 @@
                     return response.text();
                 })
                 .then(data => {
-                    result[url]={cssText : data};
-                    var relativeUrlArr = importUrl(data);
-                    if (relativeUrlArr.length !== 0) {
-                        for (let relativeUrl of relativeUrlArr) {
-                            let reqUrl = repairUrl(baseUrl, relativeUrl[2]);
-                            let reqBaseUrl = getBaseUrl(reqUrl);
-                            getCSS(reqUrl, baseUrl, result[url])
-                        }
-                    }
+                    result[url] = {
+                        cssText: data
+                    };
+                    relativeUrlArr = importUrl(data);
                 });
+
+
+            let interval = setTimeout(() => {
+                if (relativeUrlArr.length !== 0) {
+                    for (let relativeUrl of relativeUrlArr) {
+                        let reqUrl = repairUrl(baseUrl, relativeUrl[2]);
+                        let reqBaseUrl = getBaseUrl(reqUrl);
+                        getCSS(reqUrl, baseUrl, result[url])
+                    }
+                } else {
+                    clearTimeout(interval);
+                    resolve();
+                }
+            }, 0);
         }
 
         function repairUrl(baseUrl, relativeUrl) {
