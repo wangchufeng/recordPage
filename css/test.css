@@ -1,0 +1,7 @@
+@import    "./testA.css" print;
+p{
+    font-size: 30px;
+}
+#child{
+    color: fuchsia;
+}

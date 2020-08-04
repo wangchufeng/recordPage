@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/test.css">
+    <link rel="stylesheet" href="./success.css">
+    <style>
+        #container {
+            width: 100px;
+            height: 100px;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container" style="background-color: red;">
+        <span>a</span>
+        <p>ds</p>
+    </div>
+    <!-- 
+        绝对路径类似于以下的：
+        /xxx/sss
+        \xxxx\ssss
+        http://xxxx.xxx.xxx
+        ftp://sslsl.sdlfs.cddd
+        d:\url\url
+
+        以下为相对路径
+        ./url/url
+        .\url\url
+        img\xxx.jpg
+        ../url/url
+        ..\xxxxx\sss -->
+    <!-- 规定禁止使用反斜杠， 相对路径以./或者../开头， @import引入绝对路径时会忽略该文件-->
+    <script>
+        result = {href: location.href}
+
+        mainCSS()        
+        function mainCSS() {
+            var links = Array.from(document.getElementsByTagName('link'))
+            var cssLinks = links.filter(function (v, i) {
+                return v.rel === 'stylesheet' ? true : false;
+            });
+            var cssHref = cssLinks.map((v) => {
+                return v.href
+            });
+            
+            let url = cssHref[0]
+            let baseUrl = url.replace(/\/[^\/]+\.css/, ""); // http://localhost:5500/css
+            for(let url of cssHref){
+                getCSS(url, baseUrl, result);
+            }
+            console.log(result)
+        }
+
+        function cssToString(){
+
+        }
+    
+        function getCSS(url, baseUrl, result) {
+            // url为绝对路径
+            fetch(url, {
+                    method: "GET",
+                })
+                .then((response) => {
+                    return response.text();
+                })
+                .then(data => {
+                    result[url]={cssText : data};
+                    var relativeUrlArr = importUrl(data);
+                    if (relativeUrlArr.length !== 0) {
+                        for (let relativeUrl of relativeUrlArr) {
+                            let reqUrl = repairUrl(baseUrl, relativeUrl[2]);
+                            let reqBaseUrl = getBaseUrl(reqUrl);
+                            getCSS(reqUrl, baseUrl, result[url])
+                        }
+                    }
+                });
+        }
+
+        function repairUrl(baseUrl, relativeUrl) {
+            if (isAbsolute(relativeUrl)) {
+                console.warn(baseUrl + '中使用了绝对路径' + relativeUrl);
+                return false;
+            }
+            // console.log('relativeUrl:',relativeUrl)
+            var backPathLevel = relativeUrl.match(/\.\.\//g);
+            if (backPathLevel === null) {
+                return baseUrl + relativeUrl.substr(1);
+            } else {
+                let path = baseUrl.split("/");
+                for (let i = 0; i < backPathLevel.length; i++) {
+                    path.pop()
+                }
+                relativeUrl = relativeUrl.replace(/\.\.\//g, "")
+                return path.join("/") + '/' + relativeUrl;
+            }
+        }
+
+        function importUrl(data) {
+            //  提取url
+            var r = /@import[^'"]*(['"])([\S]*)\1[^"']*\;/g
+            var url = [];
+            while (true) {
+                var flag = r.exec(data)
+                if (!flag) {
+                    break;
+                }
+                url.push(flag)
+            }
+            return url
+        }
+
+        function isAbsolute(url) {
+            return /(^[\/\\].*)|(.*:.*)/.test(url);
+        }
+
+        function getBaseUrl(url) {
+            // localhost:5500/css
+            return url.replace(/\/[^\/]+\.css/, "");
+        }
+    </script>
+</body>
+
+</html>
