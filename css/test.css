@@ -1,4 +1,5 @@
 @import    "./testA.css" print;
+@import    "./testB.css" print;
 p{
     font-size: 30px;
 }
