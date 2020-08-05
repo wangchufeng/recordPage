@@ -16,12 +16,18 @@
         }).then((data) => {
             return data.json();
         }).then((data) => {
+            setInterval(oneFrame,1000,data)
+            // console.log(data[1])
+        })
+
+        function oneFrame(data) {
+            console.log(data)
             let css = data.css
             let html = data.html.replace(/<script[\s\S]*script>/g, "")
             var container = document.getElementById('container').contentWindow.document
             container.getElementsByTagName('html')[0].innerHTML = html
             var links = container.getElementsByTagName('link')
-            while(links.length){
+            while (links.length) {
                 links[0].remove()
             }
             var style = container.createElement('style');
@@ -29,8 +35,8 @@
             style.innerHTML = css;
             console.log(container.getElementsByTagName('head').item(0))
             var containerHead = container.getElementsByTagName('head').item(0);
-            containerHead.insertBefore(style,containerHead.firstChild);
-        })
+            containerHead.insertBefore(style, containerHead.firstChild);
+        }
     </script>
 </body>
 

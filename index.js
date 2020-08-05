@@ -7,7 +7,7 @@ app.use(bodyParser.urlencoded({ //此项必须在 bodyParser.json 下面,为参�
 }));
 app.use(express.static(__dirname + '/front' ));
 
-var replayInfo = {}
+var replayInfo = []
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/front/getHTML.html')
@@ -17,16 +17,18 @@ app.get('/replay', function (req, res) {
     res.sendFile(__dirname + '/front/replay.html')
 })
 
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/front/getHTML.html')
+})
+
 app.post('/record', function (req, res) {
-    replayInfo = req.body
-    // console.log(replayInfo)
+    replayInfo.push(req.body)
+    
+    console.log(replayInfo[0].location)
     res.send('ok')
 })
 
 app.get('/replayInfo', function(req ,res){
-    // let html = replayInfo.html;
-    // let css = replayInfo.css;
-    // console.log(replayInfo.html)
     res.send(replayInfo)
 })
 
