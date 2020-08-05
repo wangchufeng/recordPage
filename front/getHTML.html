@@ -31,9 +31,9 @@
                 css,
                 html: html.innerHTML
             }
-            const body = JSON.stringify({
+            const body = JSON.stringify(
                 result
-            })
+            )
             fetch('/record', {
                 method: 'POST',
                 headers: {

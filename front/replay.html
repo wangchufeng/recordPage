@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <iframe id="container" width="700px" height="1000px">
+    </iframe>
+    <script>
+        fetch('/replayInfo', {
+            method: "GET"
+        }).then((data) => {
+            return data.json();
+        }).then((data) => {
+            let css = data.css
+            let html = data.html.replace(/<script[\s\S]*script>/g, "")
+            var container = document.getElementById('container').contentWindow.document
+            container.getElementsByTagName('html')[0].innerHTML = html
+            var links = container.getElementsByTagName('link')
+            while(links.length){
+                links[0].remove()
+            }
+            var style = container.createElement('style');
+            style.type = 'text/css';
+            style.innerHTML = css;
+            console.log(container.getElementsByTagName('head').item(0))
+            var containerHead = container.getElementsByTagName('head').item(0);
+            containerHead.insertBefore(style,containerHead.firstChild);
+        })
+    </script>
+</body>
+
+</html>
