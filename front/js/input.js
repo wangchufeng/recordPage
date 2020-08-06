@@ -1,7 +1,10 @@
-var input = {
-    html: '',
+var inputReport = {
+    result: {
+        html: '',
+        seqId: 0,
+    },
     getHTML() {
-        this.html = document.getElementsByTagName('html')[0];
+        this.result.html = document.getElementsByTagName('html')[0].innerHTML;
     },
     listenInput() {
         window.addEventListener('input', function (e) {

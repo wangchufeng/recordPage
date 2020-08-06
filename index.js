@@ -17,13 +17,8 @@ app.get('/replay', function (req, res) {
     res.sendFile(__dirname + '/front/replay.html')
 })
 
-app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/front/getHTML.html')
-})
-
 app.post('/record', function (req, res) {
-    replayInfo.push(req.body)
-    
+    replayInfo.push(req.body)    
     console.log(replayInfo)
     res.send('ok')
 })
@@ -31,7 +26,5 @@ app.post('/record', function (req, res) {
 app.get('/replayInfo', function(req ,res){
     res.send(replayInfo)
 })
-
-
 
 app.listen(3000)

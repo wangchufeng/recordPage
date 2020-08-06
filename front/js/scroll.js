@@ -4,8 +4,8 @@ var scrollReport = {
     seqId: 0,
     needReport: false,
     reportEvent(report) {
-        let self = this;        
-        setInterval(function () {
+        let self = this;
+        setTimeout(function () {
             self.diff();
             if (self.needReport) {
                 var result = {
@@ -15,13 +15,14 @@ var scrollReport = {
                 }
                 report(result);
                 self.seqId++;
-                Object.assign(self.previousEvent, self.scrollElement);
+                Object.assign(self.previousEvent, self.scrollElement);                
             }
+            self.reportEvent(report);
         }, 500)
     },
 
     diff() {
-        if (this.isObjectValueEqual(this.previousEvent, this.scrollElement)) {
+        if (this.isObjectValueChange(this.previousEvent, this.scrollElement)) {
             this.needReport = false;
         } else {
             this.needReport = true;
@@ -38,12 +39,15 @@ var scrollReport = {
             console.log('start listen scroll' + id);
             let element = document.getElementById(id);
             element.addEventListener('scroll', function (e) {
-                self.scrollElement[id] = element.scrollTop;
+                self.scrollElement[id] = {
+                    y: Math.floor(element.scrollTop),
+                    x: Math.floor(element.scrollLeft),
+                }
             })
         }
     },
 
-    isObjectValueEqual(a, b) {
+    isObjectValueChange(a, b) {
         var aProps = Object.getOwnPropertyNames(a);
         var bProps = Object.getOwnPropertyNames(b);
         if (aProps.length != bProps.length) {
@@ -51,9 +55,11 @@ var scrollReport = {
         }
         for (var i = 0; i < aProps.length; i++) {
             var propName = aProps[i];
-            var propA = a[propName];
-            var propB = b[propName];
-            if (propA !== propB) {
+            var {x:propAX, y:propAY} = a[propName];
+            var {x:propBX, y:propBY} = b[propName];
+            var diffX = Math.abs(propAX - propBX);
+            var diffY = Math.abs(propAY - propBY);
+            if (diffX > 10 || diffY > 10) {
                 return false;
             }
         }
