@@ -22,7 +22,6 @@ var css = {
         })
     },
 
-
     getCSS(url, baseUrl) {
         // url为绝对路径
         var relativeUrlArr = []

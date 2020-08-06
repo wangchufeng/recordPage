@@ -24,7 +24,7 @@ app.get('/', function (req, res) {
 app.post('/record', function (req, res) {
     replayInfo.push(req.body)
     
-    console.log(replayInfo[0].location)
+    console.log(replayInfo)
     res.send('ok')
 })
 

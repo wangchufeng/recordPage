@@ -12,37 +12,60 @@
             width: 100px;
             height: 100px;
             border: 1px solid black;
+            overflow: scroll;
+        }
+
+        #content {
+            width: 50px;
+            height: 300px;
+            border: 1px solid red;
         }
     </style>
 </head>
 
 <body>
-    <div id="container" style="background-color: red;">
-        <span>a</span>
-        <p>ds</p>
-        <button ><a href='/routeA.html'>tiaozhua</a></button>
+    <div id="container">
+        <div id="content"></div>
     </div>
 
     <script src="./js/css.js"></script>
+    <script src="./js/scroll.js"></script>
     <script>
-        
-        css.initCSS().then((css) => {
-            var result = {
-                css,
-                html: html.innerHTML,
-                location: location.host + location.pathname
+        // css.initCSS().then((css) => {
+        //     var result = {
+        //         css,
+        //         html: html.innerHTML,
+        //         location: location.origin + location.pathname
+        //     }
+        //     const body = JSON.stringify(
+        //         result
+        //     )
+        //     fetch('/record', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body
+        //     })
+        // })
+
+        function scrollEventReport() {
+            scrollReport.listenScroll(['container'])
+            scrollReport.reportEvent(report);
+
+            function report(data) {
+                const body = JSON.stringify(
+                    data
+                )
+                fetch('/record', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body
+                })
             }
-            const body = JSON.stringify(
-                result
-            )
-            fetch('/record', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body
-            })
-        })
+        }
     </script>
 </body>
 
