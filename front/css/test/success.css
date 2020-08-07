@@ -1,4 +1,4 @@
-
+@import    "../testA.css" print;
 span{
     text-decoration: underline;
 }

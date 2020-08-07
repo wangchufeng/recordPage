@@ -22,7 +22,7 @@ var cssReport = {
         })
     },
 
-    getCSS(url, baseUrl) {
+    getCSS(url, baseUrl, ) {
         // url为绝对路径
         var relativeUrlArr = []
         return fetch(url, {
@@ -38,7 +38,7 @@ var cssReport = {
                     for (let relativeUrl of relativeUrlArr) {
                         let reqUrl = this.repairUrl(baseUrl, relativeUrl[2]);
                         let reqBaseUrl = this.getBaseUrl(reqUrl);
-                        reqQueue.push(this.getCSS(reqUrl, baseUrl));
+                        reqQueue.push(this.getCSS(reqUrl, reqBaseUrl));
                     }
                     return Promise.all(reqQueue).then((r) => {
                         data = data.replace(/@import[^;]+\;/g, "")
