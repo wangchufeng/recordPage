@@ -24,6 +24,9 @@ var cssReport = {
 
     getCSS(url, baseUrl, ) {
         // url为绝对路径
+        if(index == 0){
+            
+        }
         var relativeUrlArr = []
         return fetch(url, {
                 method: "GET",
