@@ -40,16 +40,7 @@
                 screenHeight: document.documentElement.clientHeight,
                 screenWidth: document.documentElement.clientWidth
             }
-            const body = JSON.stringify(
-                result
-            )
-            fetch('/record', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body
-            })
+            report(result)
         })
 
         // scrollEventReport()
@@ -80,16 +71,16 @@
         // }
         // setTimeout(inputEventReport, 2000); //测试
 
-        // function report(data) {
-        //     const body = JSON.stringify(data)
-        //     fetch('/record', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body
-        //     })
-        // }
+        function report(data) {
+            const body = JSON.stringify(data)
+            fetch('/record', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body
+            })
+        }
     </script>
 </body>
 
