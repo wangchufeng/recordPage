@@ -6,10 +6,17 @@
     <title>Document</title>
 </head>
 <body>
+    <button id='test'>test</button>
     <script>
-        for(var i=0;i<3;i++){
-            function
+        var test = document.getElementById('test');
+        function click(){
+            var a = 1;
+            test.onclick = function(){
+                console.log(a)
+            }
         }
+        click()
+        
     </script>
 </body>
 </html>

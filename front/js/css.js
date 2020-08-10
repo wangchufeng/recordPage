@@ -1,8 +1,7 @@
 // <!-- 规定禁止使用反斜杠， 相对路径以./或者../开头， @import引入绝对路径时会忽略该文件-->
-//  多个link应该写在一起
+//  多个link统一写在style标签前面
 var cssReport = {
     css: "",
-    cssStruct: {},
     reqNum: [],
     linkNum: 0,
     linkQue: [],
@@ -12,7 +11,7 @@ var cssReport = {
             return v.rel === 'stylesheet' ? true : false;
         });
         var cssHref = cssLinks.map((v) => {
-            return v.href
+            return v.href;
         });
         this.report = report;
         for (var i = 0; i < cssHref.length; i++) {
@@ -21,53 +20,49 @@ var cssReport = {
             var url = cssHref[i];
             var baseUrl = this.getBaseUrl(url);
             this.linkQue[i] = {};
-            this.getCSS(url, baseUrl, this.linkQue[i], i)
+            this.getCSS(url, baseUrl, this.linkQue[i], i);
         }
     },
 
     getCSS(url, baseUrl, cssStruct, i) {
         // url为绝对路径
+        var self = this;
         this.reqNum[i]++;
-        var relativeUrlArr = []
-        return fetch(url, {
-                method: "GET",
-            })
-            .then((response) => {
-                return response.text();
-            })
-            .then(data => {
+        var relativeUrlArr = [];
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState == 4){
+                var data = xhr.responseText;
                 cssStruct[url] = {
                     cssText: data,
                     children: [],
                 };
-                this.reqNum[i]--;
-                relativeUrlArr = this.importUrl(data);
+                self.reqNum[i]--;
+                relativeUrlArr = self.importUrl(data);
                 if (relativeUrlArr.length !== 0) {
                     for (var j = 0; j < relativeUrlArr.length; j++) {
-                        var reqUrl = this.repairUrl(baseUrl, relativeUrlArr[j][2]);
-                        var reqBaseUrl = this.getBaseUrl(reqUrl);
-                        var self = this;
-                        (function(closeI){                    
-                            self.getCSS(reqUrl, reqBaseUrl, cssStruct[url]['children'][closeI] = {}, closeI)
-                        })(j)                        
+                        var reqUrl = self.repairUrl(baseUrl, relativeUrlArr[j][2]);
+                        var reqBaseUrl = self.getBaseUrl(reqUrl);                
+                        self.getCSS(reqUrl, reqBaseUrl, cssStruct[url]['children'][j] = {}, i);
                     }
                 }
-            }).then((r) => {
-                if (this.reqNum[i] == 0) {
-                    this.linkNum--;
+                if (self.reqNum[i] == 0) {
+                    self.linkNum--;
                 }
-            }).then(() => {
-                if (this.linkNum == 0) {
-                    for (var i = 0; i < this.linkQue.length; i++) {
-                        var key = Object.getOwnPropertyNames(this.linkQue[i])[0]
-                        var tmp = this.getStringCSS(this.linkQue[i][key])
-                        this.css = this.css + '\n' + tmp  
+                if (self.linkNum == 0) {
+                    for (var k = 0; k < self.linkQue.length; k++) {
+                        var key = Object.getOwnPropertyNames(self.linkQue[k])[0];
+                        var tmp = self.getStringCSS(self.linkQue[k][key]);
+                        self.css = self.css + '\n' + tmp;
                     }
-                    this.css = this.css.replace(/@import[^;]*;/g,"")
-                    console.log(this.css)
-                    this.report({css:this.css})
+                    self.css = self.css.replace(/@import[^;]*;/g,"");
+                    console.log(self.css);
+                    self.report({css:self.css});
                 }
-            });
+            }
+        }
+        xhr.open('GET',url,true);
+        xhr.send(null);
     },
 
     getStringCSS(obj) {
@@ -120,7 +115,6 @@ var cssReport = {
     },
 
     getBaseUrl(url) {
-        // localhost:5500/css
         return url.replace(/\/[^\/]+\.css/, "");
     }
 }
