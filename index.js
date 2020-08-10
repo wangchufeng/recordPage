@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+const { json } = require('express');
 app.use(bodyParser.json({limit: '1mb'}));  //body-parser 解析json格式数据
 app.use(bodyParser.urlencoded({ //此项必须在 bodyParser.json 下面,为参数编码
     extended: true
@@ -19,7 +20,7 @@ app.get('/replay', function (req, res) {
 
 app.post('/record', function (req, res) {
     replayInfo.push(req.body)    
-    console.log(replayInfo)
+    console.log(req.body)
     res.send('ok')
 })
 

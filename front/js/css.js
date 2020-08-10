@@ -3,9 +3,10 @@
 var cssReport = {
     css: "",
     cssStruct: {},
-    reqNum : 0,
-    linkNum : 0,
-    initCSS() {
+    reqNum: [],
+    linkNum: 0,
+    linkQue: [],
+    initCSS(report) {
         var links = Array.from(document.getElementsByTagName('link'))
         var cssLinks = links.filter(function (v, i) {
             return v.rel === 'stylesheet' ? true : false;
@@ -13,24 +14,20 @@ var cssReport = {
         var cssHref = cssLinks.map((v) => {
             return v.href
         });
-
-        let linkQue = []
-        // for (let url of cssHref) {
-        for (let i=0;i<cssHref.length;i++) {   
-            let url = cssHref[i]; 
-            let baseUrl = this.getBaseUrl(url)
-            this.cssStruct[url] = {}
-            linkQue[i] = this.getCSS(url, baseUrl, this.cssStruct[url]).then();
+        this.report = report;
+        for (var i = 0; i < cssHref.length; i++) {
+            this.reqNum[i] = 0;
+            this.linkNum++;
+            var url = cssHref[i];
+            var baseUrl = this.getBaseUrl(url);
+            this.linkQue[i] = {};
+            this.getCSS(url, baseUrl, this.linkQue[i], i)
         }
-        return Promise.all(linkQue).then((data) => {
-            this.css = data.join("\n");
-            return data.join("\n");
-        })
     },
 
-    getCSS(url, baseUrl, cssStruct) {
+    getCSS(url, baseUrl, cssStruct, i) {
         // url为绝对路径
-        this.reqNum++;
+        this.reqNum[i]++;
         var relativeUrlArr = []
         return fetch(url, {
                 method: "GET",
@@ -43,26 +40,47 @@ var cssReport = {
                     cssText: data,
                     children: [],
                 };
-                this.reqNum--;
+                this.reqNum[i]--;
                 relativeUrlArr = this.importUrl(data);
                 if (relativeUrlArr.length !== 0) {
-                    // for (let relativeUrl of relativeUrlArr) {
-                    for (let i=0;i<relativeUrlArr.length;i++) {
-                        let reqUrl = this.repairUrl(baseUrl, relativeUrlArr[i][2]);
-                        let reqBaseUrl = this.getBaseUrl(reqUrl);
-                        this.getCSS(reqUrl, reqBaseUrl, cssStruct[url]['children'][i]={})
+                    for (var j = 0; j < relativeUrlArr.length; j++) {
+                        var reqUrl = this.repairUrl(baseUrl, relativeUrlArr[j][2]);
+                        var reqBaseUrl = this.getBaseUrl(reqUrl);
+                        var self = this;
+                        (function(closeI){                    
+                            self.getCSS(reqUrl, reqBaseUrl, cssStruct[url]['children'][closeI] = {}, closeI)
+                        })(j)                        
                     }
-                    // return Promise.all(reqQueue).then((r) => {
-                    //     data = data.replace(/@import[^;]+\;/g, "")
-                    //     return r.join("\n") + data
-                    // })
                 }
-            }).then((r)=>{
-                if(this.reqNum == 0){
-                    console.log(this.cssStruct)
+            }).then((r) => {
+                if (this.reqNum[i] == 0) {
+                    this.linkNum--;
+                }
+            }).then(() => {
+                if (this.linkNum == 0) {
+                    for (var i = 0; i < this.linkQue.length; i++) {
+                        var key = Object.getOwnPropertyNames(this.linkQue[i])[0]
+                        var tmp = this.getStringCSS(this.linkQue[i][key])
+                        this.css = this.css + '\n' + tmp  
+                    }
+                    this.css = this.css.replace(/@import[^;]*;/g,"")
+                    console.log(this.css)
+                    this.report({css:this.css})
                 }
             });
-            
+    },
+
+    getStringCSS(obj) {
+        if (obj.children && obj.children.length > 0) {
+            for (var i = 0; i < obj.children.length; i++) {
+                var key = Object.getOwnPropertyNames(obj.children[i])
+                var tmp = this.getStringCSS(obj.children[i][key])
+                this.css = this.css + '\n' + tmp;
+            }
+            return obj.cssText
+        } else {
+            return obj.cssText;
+        }
     },
 
     repairUrl(baseUrl, relativeUrl) {
@@ -70,13 +88,12 @@ var cssReport = {
             console.warn(baseUrl + '中使用了绝对路径' + relativeUrl);
             return false;
         }
-        // console.log('relativeUrl:',relativeUrl)
         var backPathLevel = relativeUrl.match(/\.\.\//g);
         if (backPathLevel === null) {
             return baseUrl + relativeUrl.substr(1);
         } else {
-            let path = baseUrl.split("/");
-            for (let i = 0; i < backPathLevel.length; i++) {
+            var path = baseUrl.split("/");
+            for (var i = 0; i < backPathLevel.length; i++) {
                 path.pop()
             }
             relativeUrl = relativeUrl.replace(/\.\.\//g, "")

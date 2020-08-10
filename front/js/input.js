@@ -1,10 +1,12 @@
 var inputReport = {
     result: {
         html: '',
-        seqId: 0,
+        sequenceId:0,
     },
-    getHTML() {
+    getHTML(report) {
         this.result.html = document.getElementsByTagName('html')[0].innerHTML;
+        report(this.result);
+        this.result.sequenceId++;
     },
     listenInput() {
         window.addEventListener('input', function (e) {
@@ -28,9 +30,9 @@ var inputReport = {
                 case 'SELECT':
                     var select = e.target;
                     var options = select.children;
-                    for (let option of options) {
-                        if (option.value === select.value) {
-                            option.setAttribute('selected', 'selected');
+                    for(var i=0;i<options.length;i++) {
+                        if (options[i].value === select.value) {
+                            options[i].setAttribute('selected', 'selected');
                             break
                         }
                     }

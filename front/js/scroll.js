@@ -4,7 +4,7 @@ var scrollReport = {
     seqId: 0,
     needReport: false,
     reportEvent(report) {
-        let self = this;
+        var self = this;
         setTimeout(function () {
             self.diff();
             if (self.needReport) {
@@ -34,16 +34,17 @@ var scrollReport = {
         if (!Array.isArray(idArr)) {
             return false
         }
-        console.log('start listen scroll')
-        for (let id of idArr) {
-            console.log('start listen scroll' + id);
-            let element = document.getElementById(id);
-            element.addEventListener('scroll', function (e) {
-                self.scrollElement[id] = {
-                    y: Math.floor(element.scrollTop),
-                    x: Math.floor(element.scrollLeft),
-                }
-            })
+        for (var i=0;i<idArr.length;i++) {
+            console.log('start listen scroll' + idArr[i]);
+            var element = document.getElementById(idArr[i]);
+            (function(closeId){
+                element.addEventListener('scroll', function (e) {
+                    self.scrollElement[closeId] = {
+                        y: Math.floor(element.scrollTop),
+                        x: Math.floor(element.scrollLeft),
+                    }
+                })
+            })(idArr[i])            
         }
     },
 
