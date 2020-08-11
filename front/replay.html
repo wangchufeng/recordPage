@@ -11,31 +11,95 @@
     <iframe id="container" width="700px" height="1000px">
     </iframe>
     <script>
+        var scrollElement = {}
         fetch('/replayInfo', {
             method: "GET"
         }).then((data) => {
             return data.json();
         }).then((data) => {
-            setInterval(oneFrame,1000,data)
-            // console.log(data[1])
+            let css = data.css;
+            let htmlArr = data.html;
+            let scrollArr = data.scroll;
+            oneFrame(css,0,htmlArr);
+            moveScroll(0, scrollArr);
         })
 
-        function oneFrame(data) {
-            console.log(data)
-            let css = data.css
-            let html = data.html.replace(/<script[\s\S]*script>/g, "")
+        function oneFrame(css, i, htmlArr) {
+            // let css = css
+            var html = htmlArr[i].html.replace(/<script[\s\S]*script>/g, "")
             var container = document.getElementById('container').contentWindow.document
             container.getElementsByTagName('html')[0].innerHTML = html
             var links = container.getElementsByTagName('link')
+            var body = container.getElementsByTagName('body')[0];
+            body.style.visibility = 'hidden';
+
+            var elements = Object.getOwnPropertyNames(scrollElement);            
+            for (let e of elements) {                                
+                var element = container.getElementById(e);                
+                var x = scrollElement[e].x
+                var y = scrollElement[e].y
+                element.scrollTo(x, y)
+            }
+            body.style.visibility = 'visible';
+
             while (links.length) {
                 links[0].remove()
             }
             var style = container.createElement('style');
             style.type = 'text/css';
-            style.innerHTML = css;
-            console.log(container.getElementsByTagName('head').item(0))
+            style.innerHTML = css.css;
             var containerHead = container.getElementsByTagName('head').item(0);
             containerHead.insertBefore(style, containerHead.firstChild);
+            i++;
+            if(i==htmlArr.length){
+                return;
+            }
+            var time = htmlArr[i].utc - htmlArr[i - 1].utc
+
+            
+            setTimeout(function () {
+                oneFrame(css, i, htmlArr)
+            }, time);
+        }
+
+        function moveScroll(i, scrollArr) {
+            var scroll = scrollArr[i];
+            // console.log(scroll)
+            var container = document.getElementById('container').contentWindow.document;
+            var scrollInfo = scroll['scroll'];
+            scrollElement = scrollInfo
+            var elements = Object.getOwnPropertyNames(scrollInfo);
+            
+
+            for (let e of elements) {                                
+                let element = container.getElementById(e);                
+                var x = scrollInfo[e].x;
+                var y = scrollInfo[e].y;
+
+                let offsetY = (y - element.scrollTop) / 100;
+                let offsetX = (x - element.scrollLeft) / 100;
+                // console.log(offsetY)
+                for(let j=1;j<=100;j++){                    
+                    setTimeout(function(){
+                        // console.log(element)
+                        let moveX = element.scrollLeft+offsetX;
+                        let moveY = element.scrollTop+offsetY                        
+                        element.scrollTo(moveX, moveY)                    
+                        scrollElement[e].y = element.scrollTop
+                        scrollElement[e].x = element.scrollLeft
+                    },5*j)
+                }                                
+                // element.scrollTo(x, y)
+            }
+            i++;
+            if(i==scrollArr.length){
+                return
+            }
+            var time = scrollArr[i].utc - scrollArr[i - 1].utc
+
+            setTimeout(function () {
+                moveScroll(i, scrollArr)
+            }, time)
         }
     </script>
 </body>

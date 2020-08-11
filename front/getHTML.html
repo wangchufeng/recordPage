@@ -10,19 +10,19 @@
     <style>
         #container {
             width: 100px;
-            height: 100px;
+            height: 300px;
             border: 1px solid black;
             overflow: scroll;
         }
         #containerTwo {
             width: 100px;
-            height: 100px;
+            height: 300px;
             border: 1px solid black;
             overflow: scroll;
         }
-        #content {
+        .content {
             width: 50px;
-            height: 300px;
+            height: 1000px;
             border: 1px solid red;
         }
     </style>
@@ -35,41 +35,36 @@
         <option value="test">test</option>
     </select>
     <div id="container">
-        <div id="content"></div>
+        <div class="content"></div>
     </div>
     <div id="containerTwo">
-        <div id="content"></div>
+        <div class="content"></div>
     </div>
 
     <script src="./js/css.js"></script>
     <script src="./js/scroll.js"></script>
     <script src="./js/input.js"></script>
     <script>
-        // scrollEventReport()
-        // function scrollEventReport() {
-        //     scrollReport.listenScroll(['container','containerTwo'])
-        //     scrollReport.reportEvent(report);
-        // }
-
-        // inputReport.listenInput();
-        // function inputEventReport() {
-        //     inputReport.getHTML(report);
-        // }
-        // setTimeout(inputEventReport, 1000); //测试
-        // setTimeout(inputEventReport, 4000);
-
-        cssReport.initCSS(report);
-
-        function report(data) {
-            const body = JSON.stringify(data)
-            fetch('/record', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body
-            })
+        scrollEventReport()
+        function scrollEventReport() {
+            scrollReport.listenScroll(['container','containerTwo'])
+            scrollReport.reportEvent();
         }
+
+        inputReport.listenInput();
+        function inputEventReport() {
+            inputReport.getHTML();
+        }
+        setInterval(function(){
+            inputEventReport();
+        },2000)
+
+        cssReport.initCSS(test);
+        function test(){ 
+            console.log('callback')
+        }
+
+        
     </script>
 </body>
 

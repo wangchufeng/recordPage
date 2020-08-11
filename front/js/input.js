@@ -1,22 +1,24 @@
 var inputReport = {
     result: {
         html: '',
+        utc: Date.now(),
         sequenceId:0,
     },
-    getHTML(report) {
+    getHTML(callback) {
+        this.callback = callback;
         this.result.html = document.getElementsByTagName('html')[0].innerHTML;
-        report(this.result);
+        this.result.utc = Date.now();
+        this.report(this.result, this.callback);
         this.result.sequenceId++;
     },
     listenInput() {
         window.addEventListener('input', function (e) {
+            var input = e.target;
             switch (e.target.nodeName) {
-                case 'TEXTAREA':
-                    var input = e.target;
+                case 'TEXTAREA':                    
                     input.setAttribute('placeholder', input.value);
                     break;
-                case 'INPUT':
-                    var input = e.target;
+                case 'INPUT':                    
                     switch (input.type) {
                         case 'text':
                             input.setAttribute('value', input.value);
@@ -38,6 +40,19 @@ var inputReport = {
                     }
                     break;
             }
-        })
+        },false)
+    },
+    report(data, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if(callback){
+                    callback()
+                }                
+            }
+        }
+        xhr.open('POST', '/recordHTML', true)
+        xhr.setRequestHeader('Content-Type', 'application/json');        
+        xhr.send(JSON.stringify(data));
     }
 }

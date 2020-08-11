@@ -5,7 +5,11 @@ var cssReport = {
     reqNum: [],
     linkNum: 0,
     linkQue: [],
-    initCSS(report) {
+    location: '',
+    screenX: '',
+    screenY: '',
+    initCSS(callback) {
+        this.callback = callback;
         var links = Array.from(document.getElementsByTagName('link'))
         var cssLinks = links.filter(function (v, i) {
             return v.rel === 'stylesheet' ? true : false;
@@ -13,7 +17,6 @@ var cssReport = {
         var cssHref = cssLinks.map((v) => {
             return v.href;
         });
-        this.report = report;
         for (var i = 0; i < cssHref.length; i++) {
             this.reqNum[i] = 0;
             this.linkNum++;
@@ -30,8 +33,8 @@ var cssReport = {
         this.reqNum[i]++;
         var relativeUrlArr = [];
         var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function(){
-            if(xhr.readyState == 4){
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
                 var data = xhr.responseText;
                 cssStruct[url] = {
                     cssText: data,
@@ -42,7 +45,7 @@ var cssReport = {
                 if (relativeUrlArr.length !== 0) {
                     for (var j = 0; j < relativeUrlArr.length; j++) {
                         var reqUrl = self.repairUrl(baseUrl, relativeUrlArr[j][2]);
-                        var reqBaseUrl = self.getBaseUrl(reqUrl);                
+                        var reqBaseUrl = self.getBaseUrl(reqUrl);
                         self.getCSS(reqUrl, reqBaseUrl, cssStruct[url]['children'][j] = {}, i);
                     }
                 }
@@ -55,13 +58,15 @@ var cssReport = {
                         var tmp = self.getStringCSS(self.linkQue[k][key]);
                         self.css = self.css + '\n' + tmp;
                     }
-                    self.css = self.css.replace(/@import[^;]*;/g,"");
+                    self.css = self.css.replace(/@import[^;]*;/g, "");
                     console.log(self.css);
-                    self.report({css:self.css});
+                    self.report({
+                        css: self.css
+                    }, self.callback);
                 }
             }
         }
-        xhr.open('GET',url,true);
+        xhr.open('GET', url, true);
         xhr.send(null);
     },
 
@@ -116,5 +121,19 @@ var cssReport = {
 
     getBaseUrl(url) {
         return url.replace(/\/[^\/]+\.css/, "");
+    },
+
+    report(data, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if(callback){
+                    callback()
+                }                
+            }
+        }
+        xhr.open('POST', '/recordCSS', true)
+        xhr.setRequestHeader('Content-Type', 'application/json');        
+        xhr.send(JSON.stringify(data));
     }
 }

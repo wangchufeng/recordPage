@@ -3,29 +3,32 @@ var scrollReport = {
     previousEvent: {},
     seqId: 0,
     needReport: false,
-    reportEvent(report) {
+    reportEvent(callback) {
+        this.callback = callback;
         var self = this;
         setTimeout(function () {
             self.diff();
             if (self.needReport) {
                 var result = {
                     "scroll": self.scrollElement,
-                    "seqId": self.seqId,
+                    "sequenceId": self.seqId,
+                    'utc': Date.now(),
                     "location": location.origin + location.pathname
                 }
-                report(result);
+                console.log(result)
+                self.report(result, this.callback);
                 self.seqId++;
-                Object.assign(self.previousEvent, self.scrollElement);                
+                Object.assign(self.previousEvent, self.scrollElement);
             }
-            self.reportEvent(report);
+            self.reportEvent(callback);
         }, 500)
     },
 
     diff() {
         if (this.isObjectValueChange(this.previousEvent, this.scrollElement)) {
-            this.needReport = false;
-        } else {
             this.needReport = true;
+        } else {
+            this.needReport = false;
         }
     },
 
@@ -34,17 +37,19 @@ var scrollReport = {
         if (!Array.isArray(idArr)) {
             return false
         }
-        for (var i=0;i<idArr.length;i++) {
+        for (var i = 0; i < idArr.length; i++) {
             console.log('start listen scroll' + idArr[i]);
             var element = document.getElementById(idArr[i]);
-            (function(closeId){
+            
+            (function (closeId,element) {
+                console.log(closeId)
                 element.addEventListener('scroll', function (e) {
                     self.scrollElement[closeId] = {
                         y: Math.floor(element.scrollTop),
                         x: Math.floor(element.scrollLeft),
                     }
                 })
-            })(idArr[i])            
+            })(idArr[i],element)
         }
     },
 
@@ -52,18 +57,38 @@ var scrollReport = {
         var aProps = Object.getOwnPropertyNames(a);
         var bProps = Object.getOwnPropertyNames(b);
         if (aProps.length != bProps.length) {
-            return false;
+            return true;
         }
         for (var i = 0; i < aProps.length; i++) {
             var propName = aProps[i];
-            var {x:propAX, y:propAY} = a[propName];
-            var {x:propBX, y:propBY} = b[propName];
+            var {
+                x: propAX,
+                y: propAY
+            } = a[propName];
+            var {
+                x: propBX,
+                y: propBY
+            } = b[propName];
             var diffX = Math.abs(propAX - propBX);
             var diffY = Math.abs(propAY - propBY);
             if (diffX > 10 || diffY > 10) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
+    },
+
+    report(data, callback) {        
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if (callback) {
+                    callback()
+                }
+            }
+        }
+        xhr.open('POST', '/recordScroll', true)
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(data));
     }
 }

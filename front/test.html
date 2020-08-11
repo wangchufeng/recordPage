@@ -1,22 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
     <button id='test'>test</button>
     <script>
-        var test = document.getElementById('test');
-        function click(){
-            var a = 1;
-            test.onclick = function(){
-                console.log(a)
+        // var test = document.getElementById('test');
+        function click(callback) {
+            // var a = 1;
+            // test.onclick = function(){
+            //     console.log(a)
+            // }
+            callback()
+        }
+        
+        var b = {
+            test() {
+                console.log(this.a)
             }
         }
-        click()
-        
+
+        click(test)
     </script>
 </body>
+
 </html>
