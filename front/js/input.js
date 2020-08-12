@@ -2,7 +2,7 @@ var inputReport = {
     result: {
         html: '',
         utc: Date.now(),
-        sequenceId:0,
+        sequenceId: 0,
     },
     getHTML(callback) {
         this.callback = callback;
@@ -15,10 +15,10 @@ var inputReport = {
         window.addEventListener('input', function (e) {
             var input = e.target;
             switch (e.target.nodeName) {
-                case 'TEXTAREA':                    
+                case 'TEXTAREA':
                     input.setAttribute('placeholder', input.value);
                     break;
-                case 'INPUT':                    
+                case 'INPUT':
                     switch (input.type) {
                         case 'text':
                             input.setAttribute('value', input.value);
@@ -32,27 +32,27 @@ var inputReport = {
                 case 'SELECT':
                     var select = e.target;
                     var options = select.children;
-                    for(var i=0;i<options.length;i++) {
+                    for (var i = 0; i < options.length; i++) {
                         if (options[i].value === select.value) {
                             options[i].setAttribute('selected', 'selected');
-                            break
+                            break;
                         }
                     }
                     break;
             }
-        },false)
+        }, false)
     },
     report(data, callback) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {
-                if(callback){
-                    callback()
-                }                
+                if (callback) {
+                    callback();
+                }
             }
         }
         xhr.open('POST', '/recordHTML', true)
-        xhr.setRequestHeader('Content-Type', 'application/json');        
+        xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(data));
     }
 }

@@ -32,16 +32,26 @@ var scrollReport = {
         }
     },
 
-    listenScroll(idArr) {
+    listenScroll(idArr = []) {
         var self = this;
         if (!Array.isArray(idArr)) {
             return false
         }
+
+        // if (idArr.length == 0) {
+        window.addEventListener('scroll', function (e) {
+            self.scrollElement['window'] = {
+                y: Math.floor(window.scrollY),
+                x: Math.floor(window.scrollX),
+            }
+        })
+        // }
+
         for (var i = 0; i < idArr.length; i++) {
             console.log('start listen scroll' + idArr[i]);
             var element = document.getElementById(idArr[i]);
-            
-            (function (closeId,element) {
+
+            (function (closeId, element) {
                 console.log(closeId)
                 element.addEventListener('scroll', function (e) {
                     self.scrollElement[closeId] = {
@@ -49,7 +59,7 @@ var scrollReport = {
                         x: Math.floor(element.scrollLeft),
                     }
                 })
-            })(idArr[i],element)
+            })(idArr[i], element)
         }
     },
 
@@ -78,7 +88,7 @@ var scrollReport = {
         return false;
     },
 
-    report(data, callback) {        
+    report(data, callback) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {

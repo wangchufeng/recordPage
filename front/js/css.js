@@ -127,13 +127,13 @@ var cssReport = {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {
-                if(callback){
+                if (callback) {
                     callback()
-                }                
+                }
             }
         }
         xhr.open('POST', '/recordCSS', true)
-        xhr.setRequestHeader('Content-Type', 'application/json');        
+        xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(data));
     }
 }

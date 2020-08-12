@@ -11,19 +11,16 @@
     <button id='test'>test</button>
     <script>
         // var test = document.getElementById('test');
-        function click(callback) {
-            // var a = 1;
-            // test.onclick = function(){
-            //     console.log(a)
-            // }
-            callback()
+        var a = 2
+
+        function click() {
+            var a = 1;
+            setTimeout(function () {
+                console.log(a)
+            }, 0)
         }
-        
-        var b = {
-            test() {
-                console.log(this.a)
-            }
-        }
+
+
 
         click(test)
     </script>

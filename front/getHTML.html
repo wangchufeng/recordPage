@@ -10,16 +10,18 @@
     <style>
         #container {
             width: 100px;
-            height: 300px;
+            height: 600px;
             border: 1px solid black;
             overflow: scroll;
         }
+
         #containerTwo {
             width: 100px;
-            height: 300px;
+            height: 600px;
             border: 1px solid black;
             overflow: scroll;
         }
+
         .content {
             width: 50px;
             height: 1000px;
@@ -46,25 +48,26 @@
     <script src="./js/input.js"></script>
     <script>
         scrollEventReport()
+
         function scrollEventReport() {
-            scrollReport.listenScroll(['container','containerTwo'])
+            scrollReport.listenScroll(['container', 'containerTwo'])
             scrollReport.reportEvent();
         }
 
         inputReport.listenInput();
+
         function inputEventReport() {
             inputReport.getHTML();
         }
-        setInterval(function(){
+        setInterval(function () {
             inputEventReport();
-        },2000)
+        }, 2000)
 
         cssReport.initCSS(test);
-        function test(){ 
+
+        function test() {
             console.log('callback')
         }
-
-        
     </script>
 </body>
 
