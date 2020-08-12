@@ -12,6 +12,7 @@ var inputReport = {
         this.result.sequenceId++;
     },
     listenInput() {
+        var self = this;
         window.addEventListener('input', function (e) {
             var input = e.target;
             switch (e.target.nodeName) {
@@ -40,6 +41,7 @@ var inputReport = {
                     }
                     break;
             }
+            self.getHTML();
         }, false)
     },
     report(data, callback) {

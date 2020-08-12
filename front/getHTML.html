@@ -47,23 +47,25 @@
     <script src="./js/scroll.js"></script>
     <script src="./js/input.js"></script>
     <script>
-        scrollEventReport()
 
+        cssReport.initCSS(test);
+        inputReport.getHTML();
+        
+        scrollEventReport()
         function scrollEventReport() {
             scrollReport.listenScroll(['container', 'containerTwo'])
             scrollReport.reportEvent();
         }
 
         inputReport.listenInput();
+        // function inputEventReport() {
+        //     inputReport.getHTML();
+        // }
+        // setInterval(function () {
+        //     inputEventReport();
+        // }, 2000)
 
-        function inputEventReport() {
-            inputReport.getHTML();
-        }
-        setInterval(function () {
-            inputEventReport();
-        }, 2000)
-
-        cssReport.initCSS(test);
+        
 
         function test() {
             console.log('callback')

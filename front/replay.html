@@ -21,7 +21,12 @@
             let htmlArr = data.html;
             let scrollArr = data.scroll;
             oneFrame(css, 0, htmlArr);
-            moveScroll(0, scrollArr);
+            scrollOffsetTime = scrollArr[0].utc - htmlArr[0].utc 
+
+            setTimeout(function(){
+                moveScroll(0, scrollArr);
+            },scrollOffsetTime)
+            
         })
 
         function oneFrame(css, i, htmlArr) {
@@ -31,8 +36,7 @@
             var container = containerWindow.document;
             container.getElementsByTagName('html')[0].innerHTML = html
             var links = container.getElementsByTagName('link')
-            var body = container.getElementsByTagName('body')[0];
-            body.style.visibility = 'hidden';
+            var body = container.getElementsByTagName('body')[0];            
 
             var elements = Object.getOwnPropertyNames(scrollElement);
             for (let e of elements) {
@@ -46,7 +50,6 @@
                 var y = scrollElement[e].y
                 element.scrollTo(x, y)
             }
-            body.style.visibility = 'visible';
 
             while (links.length) {
                 links[0].remove()

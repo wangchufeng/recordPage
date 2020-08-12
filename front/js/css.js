@@ -9,8 +9,11 @@ var cssReport = {
     screenX: '',
     screenY: '',
     initCSS(callback) {
+        this.location = location.href;
+        this.screenX = screen.width;
+        this.screenY = screen.height;
         this.callback = callback;
-        var links = Array.from(document.getElementsByTagName('link'))
+        var links = Array.from(document.getElementsByTagName('link'));
         var cssLinks = links.filter(function (v, i) {
             return v.rel === 'stylesheet' ? true : false;
         });
@@ -61,7 +64,10 @@ var cssReport = {
                     self.css = self.css.replace(/@import[^;]*;/g, "");
                     console.log(self.css);
                     self.report({
-                        css: self.css
+                        css: self.css,
+                        location: self.location,
+                        screenX: self.screenX,
+                        screenY: self.screenY
                     }, self.callback);
                 }
             }
@@ -73,11 +79,11 @@ var cssReport = {
     getStringCSS(obj) {
         if (obj.children && obj.children.length > 0) {
             for (var i = 0; i < obj.children.length; i++) {
-                var key = Object.getOwnPropertyNames(obj.children[i])
-                var tmp = this.getStringCSS(obj.children[i][key])
+                var key = Object.getOwnPropertyNames(obj.children[i]);
+                var tmp = this.getStringCSS(obj.children[i][key]);
                 this.css = this.css + '\n' + tmp;
             }
-            return obj.cssText
+            return obj.cssText;
         } else {
             return obj.cssText;
         }
@@ -94,9 +100,9 @@ var cssReport = {
         } else {
             var path = baseUrl.split("/");
             for (var i = 0; i < backPathLevel.length; i++) {
-                path.pop()
+                path.pop();
             }
-            relativeUrl = relativeUrl.replace(/\.\.\//g, "")
+            relativeUrl = relativeUrl.replace(/\.\.\//g, "");
             return path.join("/") + '/' + relativeUrl;
         }
     },
@@ -106,13 +112,13 @@ var cssReport = {
         var r = /@import[^'"]*(['"])([\S]*)\1[^"']*\;/g
         var url = [];
         while (true) {
-            var flag = r.exec(data)
+            var flag = r.exec(data);
             if (!flag) {
                 break;
             }
-            url.push(flag)
+            url.push(flag);
         }
-        return url
+        return url;
     },
 
     isAbsolute(url) {
@@ -128,11 +134,11 @@ var cssReport = {
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {
                 if (callback) {
-                    callback()
+                    callback();
                 }
             }
         }
-        xhr.open('POST', '/recordCSS', true)
+        xhr.open('POST', '/recordCSS', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(data));
     }
