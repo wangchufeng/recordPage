@@ -1,7 +1,7 @@
 // <!-- 规定禁止使用反斜杠， 相对路径以./或者../开头， @import引入绝对路径时会忽略该文件-->
 //  多个link统一写在style标签前面
 var cssReport = {
-    css: "",
+    css: '',
     reqNum: [],
     linkNum: 0,
     linkQue: [],
@@ -13,13 +13,14 @@ var cssReport = {
         this.screenX = screen.width;
         this.screenY = screen.height;
         this.callback = callback;
-        var links = Array.from(document.getElementsByTagName('link'));
-        var cssLinks = links.filter(function (v, i) {
-            return v.rel === 'stylesheet' ? true : false;
-        });
-        var cssHref = cssLinks.map((v) => {
-            return v.href;
-        });
+        var links = document.getElementsByTagName('link');
+        var cssHref = [];
+        for (var j = 0; j < links.length; j++) {
+            var link = links[j];
+            if (link.rel === 'stylesheet') {
+                cssHref.push(link.href);
+            }
+        }
         for (var i = 0; i < cssHref.length; i++) {
             this.reqNum[i] = 0;
             this.linkNum++;
@@ -41,7 +42,7 @@ var cssReport = {
                 var data = xhr.responseText;
                 cssStruct[url] = {
                     cssText: data,
-                    children: [],
+                    children: []
                 };
                 self.reqNum[i]--;
                 relativeUrlArr = self.importUrl(data);
@@ -61,7 +62,7 @@ var cssReport = {
                         var tmp = self.getStringCSS(self.linkQue[k][key]);
                         self.css = self.css + '\n' + tmp;
                     }
-                    self.css = self.css.replace(/@import[^;]*;/g, "");
+                    self.css = self.css.replace(/@import[^;]*;/g, '');
                     console.log(self.css);
                     self.report({
                         css: self.css,
@@ -71,7 +72,7 @@ var cssReport = {
                     }, self.callback);
                 }
             }
-        }
+        };
         xhr.open('GET', url, true);
         xhr.send(null);
     },
@@ -98,18 +99,18 @@ var cssReport = {
         if (backPathLevel === null) {
             return baseUrl + relativeUrl.substr(1);
         } else {
-            var path = baseUrl.split("/");
+            var path = baseUrl.split('/');
             for (var i = 0; i < backPathLevel.length; i++) {
                 path.pop();
             }
-            relativeUrl = relativeUrl.replace(/\.\.\//g, "");
-            return path.join("/") + '/' + relativeUrl;
+            relativeUrl = relativeUrl.replace(/\.\.\//g, '');
+            return path.join('/') + '/' + relativeUrl;
         }
     },
 
     importUrl(data) {
         //  提取url
-        var r = /@import[^'"]*(['"])([\S]*)\1[^"']*\;/g
+        var r = /@import[^'"]*(['"])([\S]*)\1[^"']*\;/g;
         var url = [];
         while (true) {
             var flag = r.exec(data);
@@ -126,7 +127,7 @@ var cssReport = {
     },
 
     getBaseUrl(url) {
-        return url.replace(/\/[^\/]+\.css/, "");
+        return url.replace(/\/[^\/]+\.css/, '');
     },
 
     report(data, callback) {
@@ -137,9 +138,9 @@ var cssReport = {
                     callback();
                 }
             }
-        }
+        };
         xhr.open('POST', '/recordCSS', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(data));
     }
-}
+};

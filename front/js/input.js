@@ -1,15 +1,20 @@
 var inputReport = {
-    result: {
+    dataToReport: {
         html: '',
         utc: Date.now(),
-        sequenceId: 0,
+        sequenceId: 0
     },
-    getHTML(callback) {
-        this.callback = callback;
-        this.result.html = document.getElementsByTagName('html')[0].innerHTML;
-        this.result.utc = Date.now();
-        this.report(this.result, this.callback);
-        this.result.sequenceId++;
+    previousHTML: '',
+    getHTML() {
+        // this.dataToReport.html = document.getElementsByTagName('html')[0].innerHTML;
+        var nowHTML = document.getElementsByTagName('html')[0].innerHTML;
+        if (nowHTML !== this.previousHTML) {
+            this.dataToReport.html = nowHTML;
+            this.dataToReport.utc = Date.now();
+            this.report(this.dataToReport);
+            this.dataToReport.sequenceId++;
+            this.previousHTML = nowHTML;
+        }
     },
     listenInput() {
         var self = this;
@@ -26,7 +31,7 @@ var inputReport = {
                             break;
                         case 'checkbox':
                         case 'radio':
-                            input.setAttribute('checked', 'checked')
+                            input.setAttribute('checked', 'checked');
                             break;
                     }
                     break;
@@ -42,19 +47,17 @@ var inputReport = {
                     break;
             }
             self.getHTML();
-        }, false)
+        }, false);
     },
-    report(data, callback) {
+    report(data) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {
-                if (callback) {
-                    callback();
-                }
+                console.log('upload success');
             }
-        }
-        xhr.open('POST', '/recordHTML', true)
+        };
+        xhr.open('POST', '/recordHTML', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(data));
     }
-}
+};

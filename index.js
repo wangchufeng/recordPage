@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
@@ -13,37 +14,37 @@ app.use(express.static(__dirname + '/front'));
 var replayInfo = {
     css: '',
     html: [],
-    scroll: [],
-}
+    scroll: []
+};
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/front/getHTML.html')
-})
+    res.sendFile(__dirname + '/front/getHTML.html');
+});
 
 app.get('/replay', function (req, res) {
-    res.sendFile(__dirname + '/front/replay.html')
-})
+    res.sendFile(__dirname + '/front/replay.html');
+});
 
 app.post('/recordScroll', function (req, res) {
-    replayInfo.scroll.push(req.body)
-    console.log(req.body)
-    res.send('ok')
-})
+    replayInfo.scroll.push(req.body);
+    console.log(req.body);
+    res.send('ok');
+});
 
 app.post('/recordCSS', function (req, res) {
-    replayInfo.css = req.body
-    // console.log(req.body)
-    res.send('ok')
-})
+    replayInfo.css = req.body;
+    // console.log(req.body);
+    res.send('ok');
+});
 
 app.post('/recordHTML', function (req, res) {
     // console.log(req.body)
     replayInfo.html.push(req.body);
-    res.send('ok')
-})
+    res.send('ok');
+});
 
 app.get('/replayInfo', function (req, res) {
-    res.send(replayInfo)
-})
+    res.send(replayInfo);
+});
 
-app.listen(3000)
+app.listen(3000);

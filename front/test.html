@@ -5,24 +5,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        #container{
+            width: 400px;
+            height: 400px;
+            border: 1px black solid;
+            position: relative;
+            left: 100px;
+        }
+        #child{
+            width: 200px;
+            height: 200px;
+            border: 1px black solid;
+        }
+        #other{
+            width: 200px;
+            height: 200px;
+            border: 1px red solid;
+            float: left;
+        }
+    </style>
 </head>
 
 <body>
-    <button id='test'>test</button>
+
+    <div id="container">
+        <div id="child"></div>
+    </div>
+
+    <div id="other">
+
+    </div>
     <script>
-        // var test = document.getElementById('test');
-        var a = 2
 
-        function click() {
-            var a = 1;
-            setTimeout(function () {
-                console.log(a)
-            }, 0)
-        }
-
-
-
-        click(test)
     </script>
 </body>
 

@@ -3,25 +3,35 @@ var scrollReport = {
     previousEvent: {},
     seqId: 0,
     needReport: false,
-    reportEvent(callback) {
-        this.callback = callback;
+    reportEvent() {
         var self = this;
         setTimeout(function () {
             self.diff();
             if (self.needReport) {
                 var result = {
-                    "scroll": self.scrollElement,
-                    "sequenceId": self.seqId,
+                    'scroll': self.scrollElement,
+                    'sequenceId': self.seqId,
                     'utc': Date.now(),
-                    "location": location.origin + location.pathname
-                }
-                console.log(result)
-                self.report(result, this.callback);
+                    'location': location.origin + location.pathname
+                };
+                console.log(result);
+                self.report(result);
                 self.seqId++;
-                Object.assign(self.previousEvent, self.scrollElement);
+                self.previousEvent = self.shallowCopy(self.scrollElement);
+                // Object.assign(self.previousEvent, self.scrollElement);
             }
-            self.reportEvent(callback);
-        }, 500)
+            self.reportEvent();
+        }, 500);
+    },
+
+    shallowCopy(src) {
+        var dst = {};
+        for (var prop in src) {
+            if (src.hasOwnProperty(prop)) {
+                dst[prop] = src[prop];
+            }
+        }
+        return dst;
     },
 
     diff() {
@@ -34,33 +44,35 @@ var scrollReport = {
 
     listenScroll(idArr = []) {
         var self = this;
-        if (!Array.isArray(idArr)) {
-            return false
+
+        if (Object.prototype.toString.call(idArr) !== '[object Array]') {
+            return false;
         }
 
-        // if (idArr.length == 0) {
-        window.addEventListener('scroll', function (e) {
-            self.scrollElement['window'] = {
+        function windowScrollEvent() {
+            scrollReport.scrollElement['window'] = {
                 y: Math.floor(window.scrollY),
-                x: Math.floor(window.scrollX),
-            }
-        })
-        // }
+                x: Math.floor(window.scrollX)
+            };
+        }
+        window.removeEventListener('scroll', windowScrollEvent);
+        window.addEventListener('scroll', windowScrollEvent);
 
         for (var i = 0; i < idArr.length; i++) {
             console.log('start listen scroll' + idArr[i]);
             var element = document.getElementById(idArr[i]);
-
-            (function (closeId, element) {
-                console.log(closeId)
-                element.addEventListener('scroll', function (e) {
-                    self.scrollElement[closeId] = {
-                        y: Math.floor(element.scrollTop),
-                        x: Math.floor(element.scrollLeft),
-                    }
-                })
-            })(idArr[i], element)
+            element.removeEventListener('scroll', self.scrollEventCallback);
+            element.addEventListener('scroll', self.scrollEventCallback);
         }
+    },
+
+    scrollEventCallback(e) {
+        var element = e.target;
+        var closeId = element.id;
+        scrollReport.scrollElement[closeId] = {
+            y: Math.floor(element.scrollTop),
+            x: Math.floor(element.scrollLeft)
+        };
     },
 
     isObjectValueChange(a, b) {
@@ -71,14 +83,11 @@ var scrollReport = {
         }
         for (var i = 0; i < aProps.length; i++) {
             var propName = aProps[i];
-            var {
-                x: propAX,
-                y: propAY
-            } = a[propName];
-            var {
-                x: propBX,
-                y: propBY
-            } = b[propName];
+
+            var propAX = a[propName]['x'];
+            var propAY = a[propName]['y'];
+            var propBX = b[propName]['x'];
+            var propBY = b[propName]['y'];
             var diffX = Math.abs(propAX - propBX);
             var diffY = Math.abs(propAY - propBY);
             if (diffX > 10 || diffY > 10) {
@@ -88,17 +97,15 @@ var scrollReport = {
         return false;
     },
 
-    report(data, callback) {
+    report(data) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4) {
-                if (callback) {
-                    callback()
-                }
+                console.log('upload success');
             }
-        }
-        xhr.open('POST', '/recordScroll', true)
+        };
+        xhr.open('POST', '/recordScroll', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(data));
     }
-}
+};

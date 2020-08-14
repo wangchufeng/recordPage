@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name = "format-detection" content = "telephone=no">
+    <title>test</title>
+</head>
+<body>
+    <div id="test4" class="test">test4
+        <div id="test3">test3
+            <div id="test2" data-daid="test2">test2
+                <div id="test1">test1</div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div id="req">req</div><br/>
+    <div id="res">res</div><br/>
+    <div id="err">err</div><br/>
+    <script src="reportEvent.js"></script>
+    <script type="text/javascript">
+        // 文档地址: https://www.tapd.cn/20093491/markdown_wikis/view/#1120093491001008545
+        window.onload = (function() {
+            reportEvent.init({
+                // 小程序上使用真实的appId, H5上使用以下3种枚举值:  非微信: h5-normal, 公众号: 默认h5-gzh, 开发者可在初始化时配置覆盖(公众号appid), 小程序: 真实appid
+                // 留空则根据环境自动识别
+                appId: '',
+                // 活动id, 可调用此方法更新reportEvent.updateActiveId(_activeId)
+                activeId: '',
+                // 'app', 'gzh', 'web'
+                h5Type: 'web',
+                // 前端代码版本号
+                version: '1.0',
+                // 唯一识别用户的id, 如果一开始没有, 可在后面调用此方法更新reportEvent.updateOpenId(_openid)
+                openId: '',
+                // 是否SPA页面, SPA模式需要开发者单独上报页面的onShow与onHide事件
+                spa: false,
+                // 是否开启调试模式, debug模式支持本地上报, 不需要讲页面上传到cdn再调试
+                debug: false,
+                // 是否全部切换到beacon模式, 默认是用ajax上报, 开启本开关将使本页面全部切到sendBeacon模式
+                // 在页面关闭时, 如果是ajax方式, 最后的几个事件可能无法上报成功
+                // sendBeacon是新的API, 兼容性不好, 但能保证页面关闭后数据能继续上报
+                sendBeacon: true
+            });
+
+            // SPA模式单独上报页面开关事件
+            reportEvent.enterPage('test url', 'test query');
+            reportEvent.leavePage('test url', 'test query');
+        });
+    </script>
+</body>
+</html>
