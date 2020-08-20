@@ -6,38 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        #container{
-            width: 400px;
-            height: 400px;
-            border: 1px black solid;
-            position: relative;
-            left: 100px;
-        }
-        #child{
-            width: 200px;
-            height: 200px;
-            border: 1px black solid;
-        }
-        #other{
-            width: 200px;
-            height: 200px;
-            border: 1px red solid;
-            float: left;
-        }
     </style>
 </head>
 
 <body>
-
-    <div id="container">
-        <div id="child"></div>
-    </div>
-
-    <div id="other">
-
     </div>
     <script>
-
+        function lcs(str1, str2) {
+            var len1 = str1.length;
+            var len2 = str2.length;
+            var dp = []; // 首先定义一个一维数组
+            for (var i = 0; i <= len1; i++) {
+                dp[i] = []; // 将一维数组升级为二维数组
+                for (var j = 0; j <= len2; j++) {
+                    if (i == 0 || j == 0) {
+                        dp[i][j] = 0;
+                        continue;
+                    }
+                    if (str1[i - 1] == str2[j - 1]) { // dp 的维度为 (len1+1)*(len2+1),str 的维度为 (len1)*(len2)
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i][j - 1], dp[i - 1][j]); // 否则取当前位置上或左的最大数
+                    }
+                }
+            }
+            return dp[len1][len2]; // 返回二维数组最后一个值
+        }
+        console.log(lcs('abcda', 'bcdda')); // 4
     </script>
 </body>
 

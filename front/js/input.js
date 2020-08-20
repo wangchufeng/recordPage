@@ -1,4 +1,5 @@
 var inputReport = {
+    commonStr: '',
     dataToReport: {
         html: '',
         utc: Date.now(),
@@ -6,7 +7,6 @@ var inputReport = {
     },
     previousHTML: '',
     getHTML() {
-        // this.dataToReport.html = document.getElementsByTagName('html')[0].innerHTML;
         var nowHTML = document.getElementsByTagName('html')[0].innerHTML;
         if (nowHTML !== this.previousHTML) {
             this.dataToReport.html = nowHTML;
