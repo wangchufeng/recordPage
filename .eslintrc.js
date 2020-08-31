@@ -5,6 +5,9 @@ module.exports = {
         'es2020': true,
         'node': true
     },
+    'plugins': [
+        'html' //eslint-plugin-html插件
+    ],
     'parserOptions': {
         'ecmaVersion': 11
     },

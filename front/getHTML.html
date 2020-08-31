@@ -46,26 +46,26 @@
     <script src="./js/css.js"></script>
     <script src="./js/scroll.js"></script>
     <script src="./js/input.js"></script>
+    <script src="./js/click.js"></script>
     <script>
-
         cssReport.initCSS(test);
         inputReport.getHTML();
-        
-        scrollEventReport()
+        clickReport.listenClick();
+
+        scrollEventReport();
+
         function scrollEventReport() {
-            scrollReport.listenScroll(['container', 'containerTwo'])
+            scrollReport.listenScroll(['container', 'containerTwo']);
             scrollReport.reportEvent();
         }
 
-        inputReport.listenInput(); 
+        inputReport.listenInput();
         // setInterval(function () {
         //     inputReport.getHTML();
         // }, 2000)
 
-        
-
         function test() {
-            console.log('callback')
+            console.log('callback');
         }
     </script>
 </body>

@@ -3,81 +3,128 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0 ">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        #clickCanvas {
+            position: absolute;
+            z-index: 10000;
+        }
+    </style>
 </head>
 
 <body>
-    <iframe id="container" width="700px" height="1000px">
-    </iframe>
+    <div style="position: relative;">
+        <iframe id="container" width="375px" height="670px" style="position: absolute;">
+        </iframe>
+        <div id='clickCanvas' style="width: 700px;height: 1000px; position:absolute;"></div>
+    </div>
+    <script src="./js/diff.js"></script>
+
     <script>
-        var scrollElement = {}
+        const bbbb = 1;
+        var clickCanvas = document.getElementById('clickCanvas');
+        var mouse = document.createElement('div');
+        mouse.style.visibility = 'hidden';
+        mouse.style.position = 'absolute';
+        mouse.style.width = '20px';
+        mouse.style.height = '20px';
+        mouse.style.backgroundColor = 'black';
+        clickCanvas.appendChild(mouse);
+
+        var firstHtml = '';
+        var scrollElement = {};
+        var i = 0;
+        var css = '';
         fetch('/replayInfo', {
             method: "GET"
         }).then((data) => {
             return data.json();
         }).then((data) => {
-            let css = data.css;
-            let htmlArr = data.html;
-            let scrollArr = data.scroll;
-            oneFrame(css, 0, htmlArr);
-            scrollOffsetTime = scrollArr[0].utc - htmlArr[0].utc;
+            css = LZString.decompressFromEncodedURIComponent(data.css);
+            let event = data.event;
+            setTimeout(function () {
+                oneFrame(css, i, event);
+            }, 0);
+        });
 
-            setTimeout(function(){
-                moveScroll(0, scrollArr);
-            },scrollOffsetTime)
-            
-        })
-
-        function oneFrame(css, i, htmlArr) {
-            // let css = css
-            var html = htmlArr[i].html.replace(/<script[\s\S]*script>/g, "")
-            var containerWindow = document.getElementById('container').contentWindow
-            var container = containerWindow.document;
-            container.getElementsByTagName('html')[0].innerHTML = html
-            var links = container.getElementsByTagName('link')
-            var body = container.getElementsByTagName('body')[0];            
-
-            var elements = Object.getOwnPropertyNames(scrollElement);
-            for (let e of elements) {
-                var element
-                if (e == 'window') {
-                    element = containerWindow
-                } else {
-                    element = container.getElementById(e);
-                }
-                var x = scrollElement[e].x
-                var y = scrollElement[e].y
-                element.scrollTo(x, y)
-            }
-
-            while (links.length) {
-                links[0].remove()
-            }
-            var style = container.createElement('style');
-            style.type = 'text/css';
-            style.innerHTML = css.css;
-            var containerHead = container.getElementsByTagName('head').item(0);
-            containerHead.insertBefore(style, containerHead.firstChild);
-            i++;
-            if (i == htmlArr.length) {
-                return;
-            }
-            var time = htmlArr[i].utc - htmlArr[i - 1].utc
-
+        function replayClick(i, positionArr) {
+            var x = positionArr[i].x;
+            var y = positionArr[i].y;
+            mouse.style.top = y + 'px';
+            mouse.style.left = x + 'px';
+            mouse.style.visibility = 'visible';
+            setTimeout(() => {
+                mouse.style.visibility = 'hidden';
+            }, 300);
+            i = i + 1;
+            var time = positionArr[i].utc - positionArr[i - 1].utc;
 
             setTimeout(function () {
-                oneFrame(css, i, htmlArr)
+                replayClick(i, positionArr);
             }, time);
         }
 
-        function moveScroll(i, scrollArr) {
-            var scroll = scrollArr[i];
-            // console.log(scroll)
-            var containerWindow = document.getElementById('container').contentWindow
+        function oneFrame(css, i, event) {
+            var htmlStr = event[i].data.html.html;
+            var htmlType = event[i].data.html.type;
+            var html = '';
+            if (htmlType == 'html') {
+                firstHtml = LZString.decompressFromEncodedURIComponent(htmlStr);
+                html = firstHtml;
+            } else if (htmlType == 'increment') {
+                var increment = LZString.decompressFromEncodedURIComponent(htmlStr);
+                html = mergeDiff(firstHtml, increment);
+            }
+            html = html.replace(/<script[\s\S]*script>/g, "");
+            var containerWindow = document.getElementById('container').contentWindow;
             var container = containerWindow.document;
-            var scrollInfo = scroll['scroll'];
-            scrollElement = scrollInfo
+            container.getElementsByTagName('html')[0].innerHTML = html;
+            var links = container.getElementsByTagName('link');
+            var body = container.getElementsByTagName('body')[0];
+            while (links.length) {
+                links[0].remove();
+            }
+            var style = container.createElement('style');
+            style.type = 'text/css';
+            style.innerHTML = css;
+            var containerHead = container.getElementsByTagName('head').item(0);
+            containerHead.insertBefore(style, containerHead.firstChild);
+            var elements = Object.getOwnPropertyNames(scrollElement);
+            for (let e of elements) {
+                var element;
+                if (e == 'window') {
+                    element = containerWindow;
+                } else {
+                    element = container.getElementById(e);
+                }
+                var x = scrollElement[e].x;
+                var y = scrollElement[e].y;
+                element.scrollTo(x, y);
+            }
+            i++;
+            if (i == event.length) {
+                return;
+            }
+            var time = (event[i].data.utc - event[i - 1].data.utc) / bbbb;
+
+            setTimeout(function () {
+                if (event[i]['type'] == 'html') {
+                    oneFrame(css, i, event);
+                } else if (event[i]['type'] == 'scroll') {
+                    moveScroll(i, event);
+                }
+            }, time);
+        }
+
+        function moveScroll(i, event) {
+            var scroll = event[i].data;
+            var containerWindow = document.getElementById('container').contentWindow;
+            var container = containerWindow.document;
+
+            let scrollInfoStr = LZString.decompressFromEncodedURIComponent(scroll.scroll);
+            let scrollInfo = JSON.parse(scrollInfoStr);
+            scrollElement = Object.assign(scrollInfo);
             var elements = Object.getOwnPropertyNames(scrollInfo);
 
 
@@ -87,47 +134,31 @@
                 let offsetY;
                 var x = scrollInfo[e].x;
                 var y = scrollInfo[e].y;
+                var frequency = 99;
                 if (e == 'window') {
                     element = containerWindow;
-                    offsetY = (y - element.scrollY) / 100;
-                    offsetX = (x - element.scrollX) / 100;
+                    offsetY = (y - element.scrollY) / frequency;
+                    offsetX = (x - element.scrollX) / frequency;
                 } else {
                     element = container.getElementById(e);
-                    offsetY = (y - element.scrollTop) / 100;
-                    offsetX = (x - element.scrollLeft) / 100;
+                    offsetY = (y - element.scrollTop) / frequency;
+                    offsetX = (x - element.scrollLeft) / frequency;
                 }
-                // console.log(offsetY)
-                for (let j = 1; j <= 100; j++) {
-                    let elementX;
-                    let elementY;
-
-                    setTimeout(function () {
-                        if (e == 'window') {
-                            elementX = element.scrollX;
-                            elementY = element.scrollY;
-                        } else {
-                            elementX = element.scrollLeft;
-                            elementY = element.scrollTop;
-                        }
-                        // console.log(element)
-                        let moveX = elementX + offsetX;
-                        let moveY = elementY + offsetY
-                        element.scrollTo(moveX, moveY)
-                        scrollElement[e].y = elementY
-                        scrollElement[e].x = elementX
-                    }, 5 * j)
-                }
-                // element.scrollTo(x, y)
+                element.style.scrollBehavior = 'smooth';
+                element.scrollTo(x, y);
             }
             i++;
-            if (i == scrollArr.length) {
-                return
+            if (i == event.length) {
+                return;
             }
-            var time = scrollArr[i].utc - scrollArr[i - 1].utc
-
+            var time = (event[i].data.utc - event[i - 1].data.utc) / bbbb;
             setTimeout(function () {
-                moveScroll(i, scrollArr)
-            }, time)
+                if (event[i]['type'] == 'html') {
+                    oneFrame(css, i, event);
+                } else if (event[i]['type'] == 'scroll') {
+                    moveScroll(i, event);
+                }
+            }, time);
         }
     </script>
 </body>
